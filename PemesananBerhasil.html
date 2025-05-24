@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pemesanan Berhasil</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 30px;
+    }
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+    h2 {
+      margin-top: 20px;
+      border-bottom: 2px solid #f64c89;
+      padding-bottom: 6px;
+      color: #f64c89;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .total {
+      text-align: right;
+      font-weight: bold;
+      margin-top: 15px;
+      font-size: 18px;
+    }
+    .info {
+      margin-bottom: 15px;
+    }
+    .info p {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Pesanan Berhasil</h1>
+
+    <div class="info" id="infoPemesan">
+      <h2>Data Pemesan</h2>
+      <p><strong>Nama:</strong> <span id="namaPemesan"></span></p>
+      <p><strong>Alamat:</strong> <span id="alamatPemesan"></span></p>
+      <p><strong>Telepon:</strong> <span id="teleponPemesan"></span></p>
+      <p><strong>Email:</strong> <span id="emailPemesan"></span></p>
+      <p><strong>Metode Pembayaran:</strong> <span id="pembayaranPemesan"></span></p>
+    </div>
+
+    <div class="keranjang" id="keranjangPesanan">
+      <h2>Detail Produk</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Produk</th>
+            <th>Harga</th>
+            <th>Jumlah</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyKeranjang"></tbody>
+      </table>
+      <div class="total" id="totalBayar"></div>
+    </div>
+  </div>
+
+<script>
+  // Ambil data pemesan dan keranjang dari localStorage
+  const dataPemesan = JSON.parse(localStorage.getItem("dataPemesan"));
+  const keranjang = JSON.parse(localStorage.getItem("keranjang"));
+
+  // Tampilkan data pemesan
+  if (dataPemesan) {
+  document.getElementById("namaPemesan").textContent = dataPemesan.nama || '-';
+  document.getElementById("alamatPemesan").textContent = dataPemesan.alamat || '-';
+  document.getElementById("teleponPemesan").textContent = dataPemesan.telepon || '-';
+  document.getElementById("emailPemesan").textContent = dataPemesan.email || '-';
+  // pembayaran should be array, join with comma for friendly display
+  document.getElementById("pembayaranPemesan").textContent = dataPemesan.pembayaran ? dataPemesan.pembayaran.join(", ") : '-';
+  }
+
+
+  // Tampilkan isi keranjang
+  const tbody = document.getElementById("tbodyKeranjang");
+  let totalHarga = 0;
+
+  if (keranjang && keranjang.length > 0) {
+    keranjang.forEach(item => {
+      const totalItem = item.harga * item.jumlah;
+      totalHarga += totalItem;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${item.nama}</td>
+        <td>Rp ${item.harga.toLocaleString()}</td>
+        <td>${item.jumlah}</td>
+        <td>Rp ${totalItem.toLocaleString()}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } else {
+    tbody.innerHTML = '<tr><td colspan="4">Keranjang kosong</td></tr>';
+  }
+
+  // Tampilkan total bayar
+  document.getElementById("totalBayar").textContent = `Total Bayar: Rp ${totalHarga.toLocaleString()}`;
+</script>
+
+</body>
+</html>
