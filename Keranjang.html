@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Keranjang Belanja</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f7f7f7;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    select, button {
+      padding: 8px 12px;
+      margin: 0 5px;
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    button.action-btn {
+      background-color: #f64c89;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      padding: 5px 10px;
+      font-weight: bold;
+    }
+    button.action-btn:hover {
+      background-color: #d63a71;
+    }
+    #totalBayar {
+      font-weight: bold;
+      font-size: 18px;
+      text-align: right;
+      margin-top: 10px;
+    }
+    .btn-lanjut {
+      display: block;
+      margin: 0 auto;
+      padding: 10px 30px;
+      background-color: #d63a71;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 18px;
+      cursor: pointer;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      width: max-content;
+    }
+    .btn-lanjut:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Keranjang Belanja</h2>
+
+    <div class="form-group">
+      <select id="itemSelect" aria-label="Pilih Produk">
+        <option value="0">Pilih Produk</option>
+        <option value="90000">Rose - Rp 90.000</option>
+        <option value="58500">Kaktus - Rp 58.500</option>
+        <option value="135000">Tulip - Rp 135.000</option>
+        <option value="180000">Sunflower - Rp 180.000</option>
+        <option value="450000">Anggrek - Rp 450.000</option>
+        <option value="405000">Sepatu - Rp 405.000</option>
+        <option value="360000">Lily - Rp 360.000</option>
+        <option value="225000">Melati - Rp 225.000</option>
+        <option value="270000">Sakura - Rp 270.000</option>
+      </select>
+      <button onclick="tambahKeKeranjang()" class="action-btn" aria-label="Tambah ke Keranjang">Tambah</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Produk</th>
+          <th>Harga</th>
+          <th>Jumlah</th>
+          <th>Total</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="keranjangBody"></tbody>
+    </table>
+
+    <div id="totalBayar">Total Bayar: Rp 0</div>
+
+    <button class="btn-lanjut" onclick="lanjutPesanan()">Lanjut ke Pemesanan</button>
+  </div>
+
+<script>
+  let keranjang = [];
+
+  // Fungsi simpan ke localStorage
+  function simpanLocalStorage() {
+    localStorage.setItem("keranjang", JSON.stringify(keranjang));
+  }
+
+  function tambahKeKeranjang() {
+    const select = document.getElementById("itemSelect");
+    const harga = parseInt(select.value);
+    const nama = select.options[select.selectedIndex].text.split(" - ")[0];
+
+    if (harga === 0) return alert("Pilih produk dulu!");
+
+    const existing = keranjang.find(item => item.nama === nama);
+    if (existing) {
+      existing.jumlah += 1;
+    } else {
+      keranjang.push({ nama, harga, jumlah: 1 });
+    }
+    renderKeranjang();
+    simpanLocalStorage();
+  }
+
+  function ubahJumlah(index, delta) {
+    keranjang[index].jumlah += delta;
+    if (keranjang[index].jumlah < 1) keranjang[index].jumlah = 1;
+    renderKeranjang();
+    simpanLocalStorage();
+  }
+
+  function hapusItem(index) {
+    keranjang.splice(index, 1);
+    renderKeranjang();
+    simpanLocalStorage();
+  }
+
+  function renderKeranjang() {
+    const tbody = document.getElementById("keranjangBody");
+    const totalBayarDiv = document.getElementById("totalBayar");
+    tbody.innerHTML = "";
+
+    let total = 0;
+    keranjang.forEach((item, index) => {
+      const totalItem = item.harga * item.jumlah;
+      total += totalItem;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.nama}</td>
+        <td>Rp ${item.harga.toLocaleString()}</td>
+        <td>
+          <button onclick="ubahJumlah(${index}, -1)" class="action-btn" aria-label="Kurangi Jumlah">-</button>
+          ${item.jumlah}
+          <button onclick="ubahJumlah(${index}, 1)" class="action-btn" aria-label="Tambah Jumlah">+</button>
+        </td>
+        <td>Rp ${totalItem.toLocaleString()}</td>
+        <td><button onclick="hapusItem(${index})" class="action-btn" aria-label="Hapus Item">Hapus</button></td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    totalBayarDiv.textContent = `Total Bayar: Rp ${total.toLocaleString()}`;
+  }
+
+  // Load keranjang dari localStorage kalau ada
+  window.onload = function() {
+    const data = localStorage.getItem("keranjang");
+    if (data) {
+      keranjang = JSON.parse(data);
+      renderKeranjang();
+    }
+  };
+
+  // Lanjut ke halaman pemesanan berhasil
+  function lanjutPesanan() {
+    if (keranjang.length === 0) {
+      alert("Keranjang kosong, silakan pilih produk dulu.");
+      return;
+    }
+    // Sudah tersimpan di localStorage, tinggal redirect
+    window.location.href = "pemesananberhasil.html";
+  }
+</script>
+
+</body>
+</html>
